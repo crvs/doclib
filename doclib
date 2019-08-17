@@ -163,8 +163,13 @@ get)
 	if [ $(echo $NUM | egrep '^[0-9]+$') ]; then
 		CFILE=$(cat $CFILES | sed -n $NUM'p')
 		FILE=$(cat $CFILE | sed -n '/^Title:/p;/^-*$/q' | sed 's/^Title: *//;s/ \+/_/g;s/$/.pdf/')
-		cp ${CFILE%.txt}.pdf $FILE
-		echo $FILE
+		if [ -f $FILE ]; then
+			echo "$FILE already present please move it or remove it before trying to get this file"
+			exit 1
+		else
+			cp ${CFILE%.txt}.pdf $FILE
+			echo $FILE
+		fi
 	else
 		clear
 		$0 get $NUM
