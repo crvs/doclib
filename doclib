@@ -1,0 +1,225 @@
+#!/bin/sh
+
+if [ "$DOCLIB_LIBRARY" = "" ]; then
+	export LIBRARY=$HOME/.config/doclib
+else
+	export LIBRARY=$DOCLIB_LIBRARY
+fi
+
+if [ -f $LIBRARY/doclibrc ]; then
+	source $LIBRARY/doclibrc
+fi
+
+if [ ! -d $LIBRARY ]; then
+	read -r -p "Library not present, create? [Y/n]" RESP
+	if [ $(echo $RESP | egrep -i '^n$') ] ; then
+		echo Aborted
+		exit 1
+	else
+		mkdir -p $LIBRARY
+		exit 0
+	fi
+fi
+
+__printusage() {
+	echo "usage:
+	doclib <command> <argument>
+commands:
+	add <filename>
+		adds the given pdf file to doclib and drops you into an editor
+		to verify/edit the metadata and  notes WARNING the file will be
+		moved into the doclib directory.
+	list <filter_string>
+		lists the files that are in the doclib (their metadata) which
+		match the filter string.
+	view <filter_string>
+		lists the files in the doclib that match the filter string and
+		prompts the user for the number of the  file the user wishes to
+		view and opens the pdf file. If the value input is not a number
+		then it is treated as another filter string and the command is
+		rerun with _that_ filter string.
+	get <filter_string>
+		lists the files in the doclib that match the filter string and
+		prompts the user for the number of the  file the user wishes to
+		get this results in copying the file to the current directory
+		with the filename being the title as written in the comments
+		file. If the value input is not a number then it is treated as
+		another filter string and the command is rerun with _that_
+		filter string.
+	edit <filter_string>
+		lists the files in the doclib that match the filter string and
+		prompts the user for the number of the  file the user wishes to
+		'edit' and opens the pdf file. If the value input is not a
+		number then it is treated as another filter string and the
+		command is rerun with _that_ filter string.
+	remove <filter_string>
+		lists the files in the doclib that match the filter string and
+		prompts the user for the number of the  file the user wishes to
+		remove from doclib. If the user inputs a number then the
+		associated files are moved to ~/doclib_rm<filename>.pdf and
+		~/doclib_rm<filename>.txt respectively. If the value input is
+		not a number then it is treated as another filter string and
+		the command is rerun with _that_ filter string.
+	dmenu
+		lists the files that are in doclib to dmenu. once a file is
+		selected it is opened.
+	help
+		pipe the usage into less
+	<no command>
+		print the usage into stdout
+general:
+	doclib keeps a directory in your home directory (by default
+	~/.config/doclib) and fills it with the documents added by \`doclib
+	add\`. When a file with name filename.pdf is \`add\`ed then the doclib
+	moves filename.pdf to <md5sum filename.pdf><datetime>.pdf and creates
+	the file <md5sum filename.pdf><datetime>.txt where it places (part of)
+	the output of pdfinfo to retrieve metadata. This file can and should be
+	edited manually since it is the main form of recovering metadata from
+	the files.
+
+	The first block of lines up to a blank line or a line consisting only
+	of dashes is reserved for metadata. Everything in the metadata block is
+	output into the manifest, which can be viewed with \`doclib list\`.
+
+	Note1: that what is written on the comments is also matched against the
+	<filter_string> in list, view and edit.
+
+	Note2: the <filter_string> is used as a pattern for matching with
+	egrep, so it supports regular expressions.
+file format:
+	The metadata/comments file has the format:
+
+Title:  <title>
+Keywords: <keyphrases separated by commas (it doesn't really matter though)>
+Author: <list of authors>
+CreationDate: <date the file was created (filled by pdfinfo)>
+Added: <date the file was added to doclib (filled by doclib)>
+
+<any comments that you may deem useful or not...>
+
+	In it's current version the Title, Keywords and Author tags are used by
+	the dmenu interface and therefore should be there, but it is easy
+	enough to modify the behaviour.
+"
+	}
+
+__manifest() {
+	# create the manifest file as well as the associated comments file list
+	FILTER="$1"
+
+	export CFILES=$(mktemp)
+	egrep -i "$FILTER" $LIBRARY/*.txt 2>/dev/null | \
+		awk -vFS=: '{print $1}' | \
+		uniq > \
+		$CFILES
+
+	export MANIFEST=$(mktemp)
+	COUNT=1
+	for f in $(cat $CFILES); do
+		echo $COUNT: >> $MANIFEST
+		COUNT=$(( COUNT + 1 ))
+		cat $f | sed -n '/^-*$/q;p' >> $MANIFEST
+		echo >> $MANIFEST
+	done
+}
+
+case $1 in
+add)
+	if [ ${2##*.} = 'pdf' ] ; then
+		NAMEROOT=$(md5sum $2 | awk '{print $1}')$(date +"%Y%m%d%H%M%S")
+		FILE=${LIBRARY}/${NAMEROOT}.pdf
+		mv $2 $FILE
+		COMMENTS=${LIBRARY}/${NAMEROOT}.txt
+		pdfinfo $FILE | egrep -i '^(Title|Author|Keywords|CreationDate)' >> $COMMENTS
+		echo "Added:          $(date)" >> $COMMENTS
+		xdg-open $FILE 2>&1 1>/dev/null &
+		$EDITOR $COMMENTS
+	else
+		echo "only pdf files are accepted"
+	fi
+	;;
+list)
+	__manifest "$2"
+	cat $MANIFEST
+	;;
+view)
+	__manifest "$2"
+	cat $MANIFEST
+	printf "insert file number: "
+	read NUM
+	if [ $(echo $NUM | egrep '^[0-9]+$') ]; then
+		CFILE=$(cat $CFILES | sed -n $NUM'p')
+		xdg-open ${CFILE%txt}pdf 2>&1 1>/dev/null &
+	else
+		clear
+		$0 view $NUM
+	fi
+	;;
+get)
+	__manifest "$2"
+	cat $MANIFEST
+	printf "insert file number: "
+	read NUM
+	if [ $(echo $NUM | egrep '^[0-9]+$') ]; then
+		CFILE=$(cat $CFILES | sed -n $NUM'p')
+		FILE=$(cat $CFILE | sed -n '/^Title:/p;/^-*$/q' | sed 's/^Title: *//;s/ \+/_/g;s/$/.pdf/')
+		cp ${CFILE%.txt}.pdf $FILE
+		echo $FILE
+	else
+		clear
+		$0 get $NUM
+	fi
+	;;
+edit)
+	__manifest "$2"
+	cat $MANIFEST
+	printf "insert file number: "
+	read NUM
+	if [ $(echo $NUM | egrep '^[0-9]+$') ]; then
+		CFILE=$(cat $CFILES | sed -n $NUM'p')
+		xdg-open ${CFILE%txt}pdf 2>&1 1>/dev/null &
+		$EDITOR $CFILE
+	else
+		clear
+		$0 edit $NUM
+	fi
+	;;
+remove)
+	__manifest "$2"
+	cat $MANIFEST
+	printf "insert file number: "
+	read NUM
+	if [ $(echo $NUM | egrep '^[0-9]+$') ]; then
+		CFILE=$(cat $CFILES | sed -n $NUM'p')
+		head $CFILE
+		read -r -p "are you sure you want to remove this file? [y/N]" RESP
+		if [ $(echo $RESP | egrep -i '^y$') ] ; then
+			mv $CFILE $HOME/doclib_rm_${CFILE##*/}
+			PFILE=${CFILE%txt}pdf
+			mv $PFILE $HOME/doclib_rm_${PFILE##*/}
+		fi
+	else
+		clear
+		$0 remove $NUM
+	fi
+	;;
+dmenu)
+	__manifest ""
+	NUM=$(cat $MANIFEST | \
+		 awk -vRS='\n\n' -vFS='\n' '{ for (i = 2; i < $NF ; i++ ){ sub(/^[A-Za-z]+: */,"",$i) } printf("%s %s || %s || %s\n", $1 , $2 , $4 , $3) }' | \
+		 dmenu -p 'select paper:' -l 10 -i | awk '{sub(/: *$/,"",$1) ; print $1}'
+	 )
+
+	if [ $(echo ${NUM} | egrep '^[0-9]+$') ]; then
+		CFILE=$(cat $CFILES | sed -n ${NUM}'p')
+		xdg-open ${CFILE%.txt}.pdf 2>&1 1>/dev/null &
+	fi
+	;;
+help)
+	__printusage | less
+	;;
+*)
+	__printusage
+	;;
+esac
+
