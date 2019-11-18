@@ -126,9 +126,9 @@ __manifest() {
 case $1 in
 add)
 	if [ ${2##*.} = 'pdf' ] ; then
-		NAMEROOT=$(md5sum $2 | awk '{print $1}')$(date +"%Y%m%d%H%M%S")
+		NAMEROOT=$(md5sum "$2" | awk '{print $1}')$(date +"%Y%m%d%H%M%S")
 		FILE=${LIBRARY}/${NAMEROOT}.pdf
-		mv $2 $FILE
+		mv "$2" $FILE
 		COMMENTS=${LIBRARY}/${NAMEROOT}.txt
 		pdfinfo $FILE | egrep -i '^(Title|Author|Keywords|CreationDate)' >> $COMMENTS
 		echo "Added:          $(date)" >> $COMMENTS
