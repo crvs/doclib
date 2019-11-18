@@ -1,4 +1,3 @@
-# TODO fix the file completion to use _files
 function _doclib(){
 	local curcontext="$curcontext" state line
 	typeset -A opt_args
@@ -26,5 +25,4 @@ function _doclib(){
 		;;
 	esac
 }
-
 compdef _doclib doclib
