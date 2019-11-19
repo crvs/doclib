@@ -8,6 +8,20 @@ When a file is added to the library (using `doclib add`) it is **moved** into th
 
 All of the metadata can be (over)written by hand, the only lines in the metadata that are currently used are the Title, Author and Keywords, and they are expected to remain in this order throughout all the metadata/comments files for the dmenu interface to work correctly.
 
+## Installation
+
+To install simply run
+
+```
+make install
+```
+
+The included makefile simply copies the script to the user's local bin path (`~/.local/bin`) and makes it runnable. It also installs the manpage at the user's local manual folder (`~/.local/man`).
+
+It does not install the autocompletion file, as it only currently supports `zsh` autocompletion, but the installation script provides general instructions to get autocompletion working.
+
+Aside from installing the only thing that the makefile does by default is checking whether all dependencies are met.
+
 ## Dependencies
 
  - dmenu (for the dmenu action)
