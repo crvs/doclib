@@ -20,57 +20,58 @@ doclib is a simple command line tool to manage a library of pdf documents and te
 The usual command invocation follows the form
 .Pp
 .Nm doclib
-.Ft command argument
+.Fa command argument
 .Pp
 where the command is one of 
-.Ft add list view get edit remove dmenu help
+.Sy add list view get edit remove dmenu help
 and the argument, depending on the command can be either a
-.Ft filename
+.Em filename
 or a 
-.Ft filter .
+.Em filter .
 .Pp
 .Bl -tag -width Ds
-.It Ar *** filter
+.It Em filter
 a string that will be used to match against the file database using
-.Ft grep(1) .
+.Em grep(1) .
 Most commands that use this argument (apart from
-.Ft list )
+.Sy list )
 will prompt the user for a file number to perform the corresponding operation on.
 If the user inputs anything that is not a number, it is interpreted as a filter string and the filter is rerun.
-.It Ar add filename
+.It Sy add Ar filename
 adds the pdf file 
-.Ft filename
+.Em filename
 and opens both the pdf file (in the default pdf viewer) together with the notes file (with the default editor).
-.Ft The file is moved from its current location to the library. Note that this means that the file will cease to be stored in its current location.
-.It Ar list filter
+.Em The file is moved from its current location to the library. Note that this means that the file will cease to be stored in its current location.
+.It Sy list Ar filter
 lists all the files and metadata that match the provided filter string in the default pager.
-.It Ar view filter
+.It Sy view Ar filter
 prompt the user to select a file to view in the default pdf viewer.
-.It Ar get filter
+.It Sy get Ar filter
 prompt the user to select a file from the library and copy the file to the current directory with a descriptive name (derived from the metadata stored in the notes file).
-.It Ar edit filter
+.It Sy edit Ar filter
 prompt the user to select a file to edit its notes file (it also opens the corresponding file in the default pdf viewer).
-.It Ar remove filter
+.It Sy remove Ar filter
 prompts the user to select a file to remove from the library. The removed files (both the pdf and notes file) are moved to the user's home folder with the name
-.Ft doclib_rm<filename>
-.It Ar dmenu
+.Em doclib_rm<filename> .
+.It Sy dmenu
 lists the contents of the doclib library in dmenu. once an item is selected the associated pdf file is opened in the default viewer.
 .Be
 .Sh TECHNICAL NOTES
 doclib keeps a directory in your home directory (by default ~/.config/doclib) and fills it with the documents added by
-.Ft  doclib add .
+.Em  doclib add .
 When a file with name filename.pdf is added then the doclib moves filename.pdf to <md5sum filename.pdf><datetime>.pdf and creates the file <md5sum filename.pdf><datetime>.txt where it places (part of) the output of pdfinfo to retrieve metadata. This file can and should be edited manually since it is the main form of recovering metadata from the files.
 .Pp
-The first block of lines up to a blank line or a line consisting only of dashes is reserved for metadata. Everything in the metadata block is output into the manifest, which can be viewed with `doclib list`.
+The first block of lines up to a blank line or a line consisting only of dashes is reserved for metadata. Everything in the metadata block is output into the manifest, which can be viewed with
+.Em doclib list .
 .Pp
 Note1: what is written on the comments is also matched against the 
-.Ft filter
+.Em filter
 in list, view and edit.
 .Pp
 Note2: the
-.Ft filter
+.Em filter
 is used as a pattern for matching with
-.Ft egrep(2) ,
+.Em egrep(2) ,
 so it supports regular expressions.
 .Sh FILE FORMAT
 The metadata/comments file has the format:
