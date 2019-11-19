@@ -22,85 +22,23 @@ if [ ! -d $LIBRARY ]; then
 fi
 
 __printusage() {
-	echo "usage:
-	doclib <command> <argument>
+	cat << EOF
+usage:
+     doclib [add filename] [list filter] [view filter] [get filter]
+        [edit filter] [remove filter] [dmenu] [help]
 commands:
-	add <filename>
-		adds the given pdf file to doclib and drops you into an editor
-		to verify/edit the metadata and  notes WARNING the file will be
-		moved into the doclib directory.
-	list <filter_string>
-		lists the files that are in the doclib (their metadata) which
-		match the filter string.
-	view <filter_string>
-		lists the files in the doclib that match the filter string and
-		prompts the user for the number of the  file the user wishes to
-		view and opens the pdf file. If the value input is not a number
-		then it is treated as another filter string and the command is
-		rerun with _that_ filter string.
-	get <filter_string>
-		lists the files in the doclib that match the filter string and
-		prompts the user for the number of the  file the user wishes to
-		get this results in copying the file to the current directory
-		with the filename being the title as written in the comments
-		file. If the value input is not a number then it is treated as
-		another filter string and the command is rerun with _that_
-		filter string.
-	edit <filter_string>
-		lists the files in the doclib that match the filter string and
-		prompts the user for the number of the  file the user wishes to
-		'edit' and opens the pdf file. If the value input is not a
-		number then it is treated as another filter string and the
-		command is rerun with _that_ filter string.
-	remove <filter_string>
-		lists the files in the doclib that match the filter string and
-		prompts the user for the number of the  file the user wishes to
-		remove from doclib. If the user inputs a number then the
-		associated files are moved to ~/doclib_rm<filename>.pdf and
-		~/doclib_rm<filename>.txt respectively. If the value input is
-		not a number then it is treated as another filter string and
-		the command is rerun with _that_ filter string.
-	dmenu
-		lists the files that are in doclib to dmenu. once a file is
-		selected it is opened.
-	help
-		pipe the usage into less
-	<no command>
-		print the usage into stdout
-general:
-	doclib keeps a directory in your home directory (by default
-	~/.config/doclib) and fills it with the documents added by \`doclib
-	add\`. When a file with name filename.pdf is \`add\`ed then the doclib
-	moves filename.pdf to <md5sum filename.pdf><datetime>.pdf and creates
-	the file <md5sum filename.pdf><datetime>.txt where it places (part of)
-	the output of pdfinfo to retrieve metadata. This file can and should be
-	edited manually since it is the main form of recovering metadata from
-	the files.
+    add filename     adds the file to the doclib library
+    list filter      filter the doclib library
+    view filter      prompt to open file in viewer
+    get filter       prompt to place file in the current directory
+    edit filter      prompt to edit notes file
+    remove filter    prompt to remove file from library
+    dmenu            dmenu prompt to open file in viewer
+    help             prints this usage in less
+    <no command>     prints this usage string
 
-	The first block of lines up to a blank line or a line consisting only
-	of dashes is reserved for metadata. Everything in the metadata block is
-	output into the manifest, which can be viewed with \`doclib list\`.
-
-	Note1: that what is written on the comments is also matched against the
-	<filter_string> in list, view and edit.
-
-	Note2: the <filter_string> is used as a pattern for matching with
-	egrep, so it supports regular expressions.
-file format:
-	The metadata/comments file has the format:
-
-Title:  <title>
-Keywords: <keyphrases separated by commas (it doesn't really matter though)>
-Author: <list of authors>
-CreationDate: <date the file was created (filled by pdfinfo)>
-Added: <date the file was added to doclib (filled by doclib)>
-
-<any comments that you may deem useful or not...>
-
-	In it's current version the Title, Keywords and Author tags are used by
-	the dmenu interface and therefore should be there, but it is easy
-	enough to modify the behaviour.
-"
+for full documentation see doclib(1)
+EOF
 	}
 
 __manifest() {
