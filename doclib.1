@@ -26,7 +26,7 @@ where the command is one of
 .Sy add list view get edit remove dmenu help
 and the argument, depending on the command can be either a
 .Em filename
-or a 
+or a
 .Em filter .
 .Pp
 .Bl -tag -width Ds
@@ -50,6 +50,8 @@ prompt the user to select a file to view in the default pdf viewer.
 prompt the user to select a file from the library and copy the file to the current directory with a descriptive name (derived from the metadata stored in the notes file).
 .It Sy edit Ar filter
 prompt the user to select a file to edit its notes file (it also opens the corresponding file in the default pdf viewer).
+.It Sy note Ar filter
+prompt the user to select a file to view (or edit) its notes file in the default editor.
 .It Sy remove Ar filter
 prompts the user to select a file to remove from the library. The removed files (both the pdf and notes file) are moved to the user's home folder with the name
 .Em doclib_rm<filename> .

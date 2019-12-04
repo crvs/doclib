@@ -24,13 +24,14 @@ fi
 __printusage() {
 	cat << EOF
 usage:
-     doclib [add filename] [list filter] [view filter] [get filter]
+     doclib [add filename] [list filter] [view filter] [note filter] [get filter]
         [edit filter] [remove filter] [dmenu] [help]
 commands:
     add filename     adds the file to the doclib library
     list filter      filter the doclib library
     view filter      prompt to open file in viewer
     get filter       prompt to place file in the current directory
+    note filter      prompt to read and/or edit notes file
     edit filter      prompt to edit notes file
     remove filter    prompt to remove file from library
     dmenu            dmenu prompt to open file in viewer
@@ -125,6 +126,19 @@ edit)
 	else
 		clear
 		$0 edit $NUM
+	fi
+	;;
+note)
+	__manifest "$2"
+	cat $MANIFEST
+	printf "insert file number: "
+	read NUM
+	if [ $(echo $NUM | egrep '^[0-9]+$') ]; then
+		CFILE=$(cat $CFILES | sed -n $NUM'p')
+		$EDITOR $CFILE
+	else
+		clear
+		$0 note $NUM
 	fi
 	;;
 remove)

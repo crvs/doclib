@@ -9,7 +9,8 @@ function _doclib(){
 		subcmds=("add:<filename> add the file to the library" \
 			"list: <filter> list the stored articles" \
 			"view:<filter> view the pdf of the article" \
-			"edit:<filter> edit the comments file of a given file" \
+			"edit:<filter> edit the comments file of a given file and open the corresponding pdf" \
+			"note:<filter> read/edit the comments file of a given file" \
 			"get:<filter> copy the pdf file to the local folder with the title as name" \
 			"remove:<filter> remove a file from the library" \
 			"dmenu:start the dmenu interface to select a pdf file" \
