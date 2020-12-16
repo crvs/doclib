@@ -47,7 +47,7 @@ __manifest() {
 	FILTER="$1"
 
 	export CFILES=$(mktemp)
-	egrep -i "$FILTER" $LIBRARY/*.txt 2>/dev/null | \
+	egrep --with-filename --ignore-case "$FILTER" $LIBRARY/*.txt 2>/dev/null | \
 		awk -vFS=: '{print $1}' | \
 		uniq > \
 		$CFILES
@@ -163,9 +163,8 @@ remove)
 dmenu)
 	__manifest ""
 	NUM=$(cat $MANIFEST | \
-		 awk -vRS='\n\n' -vFS='\n' '{ for (i = 2; i < $NF ; i++ ){ sub(/^[A-Za-z]+: */,"",$i) } printf("%s %s || %s || %s\n", $1 , $2 , $4 , $3) }' | \
-		 dmenu -p 'select paper:' -l 10 -i | awk '{sub(/: *$/,"",$1) ; print $1}'
-	 )
+		 awk -vRS='\n\n' -vFS='\n' '{ for (i = 2; i < NF ; i++){ sub(/^[A-Za-z]+: */,"",$i) } printf("%s %s || %s || %s\n", $1 , $2 , $4 , $3) }' | \
+		 dmenu -p 'select paper:' -l 10 -i | awk '{sub(/: *$/,"",$1) ; print $1}')
 
 	if [ $(echo ${NUM} | egrep '^[0-9]+$') ]; then
 		CFILE=$(cat $CFILES | sed -n ${NUM}'p')

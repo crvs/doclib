@@ -9,11 +9,12 @@ verify :
 	@ echo SUCCESS all dependencies are present
 
 install : doclib doclib.1 verify
-	@ echo 
+	@ echo
 	@ echo installing the script:
 	cp doclib ${HOME}/.local/bin/
 	chmod 755 ${HOME}/.local/bin/doclib
 	
+	@mkdir -p ${HOME}/.local/man/man1
 	cp doclib.1 ${HOME}/.local/man/man1/
 	
 	@ printf "\n\
